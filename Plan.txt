@@ -1,0 +1,26 @@
+Proposed Project Structure
+weather-api/
+├── app.py                  # Main Flask app + routes
+├── requirements.txt        # Dependencies
+├── .env.example            # Template for environment variables
+├── Dockerfile              # Python app image
+└── docker-compose.yml      # App + Redis containers
+How It Works (Request Flow)
+Client GET /weather?city=London
+  └─→ Check Redis cache (key = "weather:london")
+       ├─ Cache HIT  → return cached response
+       └─ Cache MISS → call Visual Crossing API
+                       ├─ Success → store in Redis with 12h TTL, return data
+                       └─ Fail    → return error message
+What You'll Need to Do
+1. Get a free API key from Visual Crossing (https://www.visualcrossing.com/weather-api)
+2. Create the project files — app.py, requirements.txt, Dockerfile, docker-compose.yml, .env.example
+3. Run with Docker Compose — starts Redis + your app
+4. Test — hit http://localhost:5000/weather?city=London
+Implementation Details
+- Endpoint: GET /weather?city=<city_name>
+- Cache key: weather:<city> (lowercased)
+- Cache TTL: 12 hours (43200 seconds)
+- Rate limit: 5 requests per minute per IP
+- Env vars: API_KEY, REDIS_URL, PORT
+- Error handling: invalid city → 404, API down → 502, rate limit → 429
